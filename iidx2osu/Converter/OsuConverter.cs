@@ -6,6 +6,9 @@ namespace iidx2osu.Converter;
 public static class OsuConverter
 {
     public const string ResultPath = @"F:\workspace\iidx";
+    public const string BeatmapRoot = $@"{ResultPath}\osu";
+    //public const string BeatmapRoot = $@"O:\GameStorage\osu!\Songs";
+    private const bool ShouldCopyFiles = true;
 
     private static decimal BeatDuration(double bpm)
     {
@@ -168,8 +171,23 @@ public static class OsuConverter
         }
     }
 
+    private static void Swap<T>(List<T> list, int idx1, int idx2)
+    {
+        (list[idx2], list[idx1]) = (list[idx1], list[idx2]);
+    }
+
     public static void Convert(MusicInfo info, List<Chart> charts, string soundPath)
     {
+        if (charts[0].NoteCount < charts[1].NoteCount)
+        {
+            Swap(charts, 0, 1);
+        } 
+
+        if (charts[6].NoteCount < charts[7].NoteCount)
+        {
+            Swap(charts, 6, 7);
+        } 
+
         var samples = info.Difficulties.Zip(charts)
             .Where(x => x.First != 0)
             .Select(x => x.Second.GetSamples()).ToList();
@@ -178,7 +196,7 @@ public static class OsuConverter
 
         var isWma = soundPath.EndsWith(".wma");
 
-        var targetPath = Path.Join(ResultPath, "osu", $"[iidx]{info.SongId}");
+        var targetPath = Path.Join(BeatmapRoot, $"[iidx]{info.SongId}");
 
         Directory.CreateDirectory(targetPath);
 
@@ -216,6 +234,9 @@ public static class OsuConverter
                 File.WriteAllText(Path.Join(targetPath, filename), bd.ToString());
             }
         }
+
+        if (!ShouldCopyFiles)
+            return;
 
         var files2Copy = new List<string>
         {

@@ -24,6 +24,8 @@ public record Chart(Dictionary<int, List<Note>> Notes, List<Sample> BgmSounds, L
         ? int.MaxValue
         : Math.Min(BgmSounds.Min(x => x.SampleId), Notes.Values.SelectMany(x => x).Select(x => x.Sample.SampleId).Min());
 
+    public int NoteCount => Notes.Values.Select(x => x.Count).Sum();
+
     public HashSet<Sample> GetSamples()
     {
         var res = BgmSounds.Select(x => x with { Stereo = x.Stereo == 8 ? 0 : x.Stereo }).ToList();
@@ -32,7 +34,7 @@ public record Chart(Dictionary<int, List<Note>> Notes, List<Sample> BgmSounds, L
 
         return res.ToHashSet();
     }
-    
+
     public bool HasSv => TimingPoints.DistinctBy(x => x.Bpm).Count() > 1;
 }
 
@@ -93,7 +95,7 @@ public static class ChartParser
 
             var location = 0;
 
-            while (location <　d.ChartLength)
+            while (location < d.ChartLength)
             {
                 var @event = Utils.Byte2Type<ChartEvent>(reader);
                 events.Add(@event);
@@ -104,7 +106,11 @@ public static class ChartParser
 
             var samples = events
                 .Where(e => e.EventType is 2 or 3 && e.EventOffset <= endTime)
-                .Select(e => ((int Offset, int Id, int Lane))(e.EventOffset, e.EventValue, e.EventParameter + 8 * (e.EventType - 2)))
+                .Select(e => ((int Offset, int Id, int Lane))(e.EventOffset, e.EventValue, e.EventType == 2
+                        ? (e.EventParameter + 1) % 8
+                        : e.EventParameter + 8
+                    )
+                )
                 .GroupBy(x => x.Lane)
                 .ToDictionary(x => x.Key, x => x
                     .Select(y => new Sample(y.Offset, 0, y.Id))
@@ -113,7 +119,11 @@ public static class ChartParser
 
             var notes = events
                 .Where(e => e.EventType is 0 or 1 && e.EventOffset <= endTime)
-                .Select(e => ((int Offset, int Druation, int Lane))(e.EventOffset, e.EventValue, e.EventParameter + 8 * e.EventType))
+                .Select(e => ((int Offset, int Druation, int Lane))(e.EventOffset, e.EventValue, e.EventType == 0
+                        ? (e.EventParameter + 1) % 8
+                        : e.EventParameter + 8
+                    )
+                )
                 .GroupBy(x => x.Lane)
                 .ToDictionary(x => x.Key, x => x
                     .Select(y =>

@@ -38,13 +38,13 @@ public class MusicInfo
 
     public static string DifficultyName(int idx) => idx switch
     {
-        0  => "Normal",
-        1  => "Hyper",
+        0  => "Hyper",
+        1  => "Normal",
         2  => "Another",
         3  => "Beginner",
         4  => "Black Another",
-        6  => "Normal",
-        7  => "Hyper",
+        6  => "Hyper",
+        7  => "Normal",
         8  => "Another",
         9  => "Beginner",
         10 => "Black Another",
@@ -67,9 +67,9 @@ public class MusicInfo
 
             Difficulties = new[]
             {
-                ori.Difficulties[1], ori.Difficulties[2], ori.Difficulties[3], ori.Difficulties[0], ori.Difficulties[4],
+                ori.Difficulties[2], ori.Difficulties[1], ori.Difficulties[3], ori.Difficulties[0], ori.Difficulties[4],
                 0,
-                ori.Difficulties[6], ori.Difficulties[7], ori.Difficulties[8], ori.Difficulties[5], ori.Difficulties[9]
+                ori.Difficulties[7], ori.Difficulties[6], ori.Difficulties[8], ori.Difficulties[5], ori.Difficulties[9]
             };
 
             SongId = ori.SongId;
