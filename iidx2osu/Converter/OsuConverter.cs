@@ -8,6 +8,7 @@ public static class OsuConverter
     public const string ResultPath = @"F:\workspace\iidx";
     public const string BeatmapRoot = $@"{ResultPath}\osu";
     //public const string BeatmapRoot = $@"O:\GameStorage\osu!\Songs";
+    //public const string BeatmapRoot = @"F:\workspace\iidx\patch";
     private const bool ShouldCopyFiles = true;
 
     private static decimal BeatDuration(double bpm)
@@ -155,9 +156,9 @@ public static class OsuConverter
 
         foreach (var (laneNumber, notes) in chart.Notes)
         {
-            if (!includePlate && laneNumber == 7) continue;
+            if (!includePlate && laneNumber == 0) continue;
 
-            var xPos = (int)Math.Floor(laneSize * laneNumber + laneSize / 2);
+            var xPos = (int)Math.Floor(laneSize * laneNumber + laneSize / 2 - (includePlate ? 0 : laneSize));
 
             foreach (var note in notes)
             {
@@ -181,12 +182,12 @@ public static class OsuConverter
         if (charts[0].NoteCount < charts[1].NoteCount)
         {
             Swap(charts, 0, 1);
-        } 
+        }
 
         if (charts[6].NoteCount < charts[7].NoteCount)
         {
             Swap(charts, 6, 7);
-        } 
+        }
 
         var samples = info.Difficulties.Zip(charts)
             .Where(x => x.First != 0)
@@ -235,8 +236,7 @@ public static class OsuConverter
             }
         }
 
-        if (!ShouldCopyFiles)
-            return;
+        if (!ShouldCopyFiles) return;
 
         var files2Copy = new List<string>
         {
